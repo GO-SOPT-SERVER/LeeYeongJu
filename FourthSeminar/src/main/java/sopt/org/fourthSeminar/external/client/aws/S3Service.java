@@ -67,20 +67,9 @@ public class S3Service {
 
     public List<String> uploadImages(List<MultipartFile> multipartFileList, String folder) {
         List<String> imageList = new ArrayList<>();
-        multipartFileList.forEach(multipartFile -> {
-            String fileName = createFileName(multipartFile.getOriginalFilename());
-            ObjectMetadata objectMetadata = new ObjectMetadata();
-            objectMetadata.setContentLength(multipartFile.getSize());
-            objectMetadata.setContentType(multipartFile.getContentType());
-
-            try (InputStream inputStream = multipartFile.getInputStream()) {
-                amazonS3.putObject(new PutObjectRequest(bucket + "/" + folder + "/image", fileName, inputStream, objectMetadata)
-                        .withCannedAcl(CannedAccessControlList.PublicRead));
-                imageList.add(amazonS3.getUrl(bucket + "/" + folder + "/image", fileName).toString());
-            } catch (IOException e) {
-                throw new NotFoundException(Error.NOT_FOUND_SAVE_IMAGE_EXCEPTION, Error.NOT_FOUND_SAVE_IMAGE_EXCEPTION.getMessage());
-            }
-        });
+        multipartFileList.forEach(multipartFile ->
+                imageList.add(uploadImage(multipartFile, folder))
+        );
         return imageList;
     }
 
